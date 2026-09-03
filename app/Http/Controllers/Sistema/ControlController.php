@@ -22,7 +22,7 @@ class ControlController extends Controller
         }
         // Reportes
         else  if($user->hasRole('reportes')){
-            return redirect()->route('admin.reporte.generales.index');
+            return redirect()->route('admin.reporte.inventario.entrada.index');
         }
 
         return redirect()->route('no.permisos.index');

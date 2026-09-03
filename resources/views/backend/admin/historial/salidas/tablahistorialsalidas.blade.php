@@ -1,86 +1,57 @@
-@php
-    $totalGeneral = $arraySalidas->sum('subtotal');
-@endphp
-
-<div class="table-responsive">
-    <table class="table table-bordered table-striped table-hover table-sm" id="tabla-historial">
-        <thead class="thead-dark">
-        <tr>
-            <th>#</th>
-            <th>Fecha</th>
-            <th>Material</th>
-            <th>Tipo Salida</th>
-            <th>Departamento</th>
-            <th>N° Solicitud</th>
-            <th class="text-center">Cantidad</th>
-            <th class="text-right">Precio Unit.</th>
-            <th class="text-right">Subtotal</th>
-            <th class="text-center">Estado</th>
-            <th class="text-center">Entregas</th>
-            <th class="text-center">Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        @forelse($arraySalidas as $key => $salida)
-            <tr>
-                <td>{{ $key + 1 }}</td>
-                <td>{{ \Carbon\Carbon::parse($salida->fecha)->format('d-m-Y') }}</td>
-                <td>{{ $salida->material }}</td>
-                <td>{{ $salida->tipo_salida ?? '—' }}</td>
-                <td>{{ $salida->departamento ?? '—' }}</td>
-                <td>{{ $salida->numero_solicitud ?? '—' }}</td>
-                <td class="text-center">{{ $salida->cantidad_salida }}</td>
-                <td class="text-right">
-                    ${{ number_format($salida->precio ?? 0, 2) }}
-                </td>
-                <td class="text-right">
-                    ${{ number_format($salida->subtotal ?? 0, 2) }}
-                </td>
-                <td class="text-center">
-                    @if($salida->estado === 'finalizado')
-                        <span class="badge badge-success">Finalizado</span>
-                    @else
-                        <span class="badge badge-warning">Pendiente</span>
-                    @endif
-                </td>
-                <td class="text-center">
-                    @if($salida->total_entregas > 0)
-                        <span class="badge badge-info">{{ $salida->total_entregas }}</span>
-                    @else
-                        <span class="text-muted">—</span>
-                    @endif
-                </td>
-                <td class="text-center text-nowrap">
-                    <button class="btn btn-xs btn-info" onclick="verDetalle({{ $salida->id }})" title="Ver detalle">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-xs btn-warning" onclick="modalEditar({{ $salida->id }})" title="Editar">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-xs btn-danger" onclick="eliminar({{ $salida->id }})" title="Eliminar">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="12" class="text-center text-muted py-3">
-                    No se encontraron registros con los filtros aplicados.
-                </td>
-            </tr>
-        @endforelse
-        </tbody>
-
-        @if($arraySalidas->count() > 0)
-            <tfoot>
-            <tr class="table-dark font-weight-bold">
-                <td colspan="8" class="text-right">TOTAL GENERAL:</td>
-                <td class="text-right">
-                    ${{ number_format($totalGeneral, 2) }}
-                </td>
-                <td colspan="3"></td>
-            </tr>
-            </tfoot>
-        @endif
-    </table>
-</div>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <table id="tabla" class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th style="width:5%">ID</th>
+                                <th style="width:10%">Fecha</th>
+                                <th style="width:55%">Descripción</th>
+                                <th style="width:30%">Opciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($arraySalidas as $dato)
+                                <tr>
+                                    <td>{{ $dato->id }}</td>
+                                    <td>{{ $dato->fecha_fmt }}</td>
+                                    <td>{{ $dato->descripcion ?? '' }}</td>
+                                    <td class="text-center">
+                                        <button type="button"
+                                                class="btn btn-success btn-xs"
+                                                style="margin:2px"
+                                                onclick="window.location.href='{{ url('/admin/historial/salidas/extras') }}/{{ $dato->id }}'">
+                                            <i class="fas fa-plus"></i> Extras
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-info btn-xs"
+                                                style="margin:2px"
+                                                onclick="verDetalle({{ $dato->id }}, 'Salida #{{ $dato->id }} — {{ $dato->fecha_fmt }}')">
+                                            <i class="fas fa-list"></i> Detalle
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-warning btn-xs"
+                                                style="margin:2px"
+                                                onclick="modalEditar({{ $dato->id }})">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-danger btn-xs"
+                                                style="margin:2px"
+                                                onclick="eliminar({{ $dato->id }})">
+                                            <i class="fas fa-trash"></i> Borrar
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

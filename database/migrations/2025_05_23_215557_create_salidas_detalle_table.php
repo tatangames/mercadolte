@@ -13,22 +13,14 @@ return new class extends Migration
     {
         Schema::create('salidas_detalle', function (Blueprint $table) {
             $table->id();
+            $table->bigInteger('id_salida')->unsigned();
             $table->bigInteger('id_entrada_detalle')->unsigned();
-            $table->bigInteger('id_tiposalida')->unsigned()->nullable();
-            $table->bigInteger('id_departamento')->unsigned()->nullable();
-
-            $table->date('fecha');
-            $table->text('descripcion')->nullable();
-            $table->string('numero_solicitud', 100)->nullable();
-
             $table->integer('cantidad_salida');
 
-            // PARA PODER SEGUIR AGREGANDOLE MAS SALIDAS
-            $table->enum('estado', ['pendiente', 'finalizado'])->default('pendiente');
+            $table->string('observaciones', 200)->nullable();
 
-            $table->foreign('id_tiposalida')->references('id')->on('tipo_salida');
+            $table->foreign('id_salida')->references('id')->on('salidas');
             $table->foreign('id_entrada_detalle')->references('id')->on('entradas_detalle');
-            $table->foreign('id_departamento')->references('id')->on('departamentos');
         });
     }
 

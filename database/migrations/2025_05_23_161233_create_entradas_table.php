@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::create('entradas', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('id_proveedor')->unsigned()->nullable();
-
+            $table->bigInteger('id_proveedor')->unsigned();
             $table->date('fecha');
-            $table->text('descripcion')->nullable();
-            $table->string('lote', 100)->nullable();
+            $table->string('factura', 100)->nullable();
+            $table->string('descripcion', 800)->nullable();
 
             $table->foreign('id_proveedor')->references('id')->on('proveedor');
         });

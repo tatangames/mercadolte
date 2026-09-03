@@ -5,11 +5,18 @@ namespace App\Http\Controllers\Sistema;
 use App\Http\Controllers\Controller;
 use App\Models\Entradas;
 use App\Models\EntradasDetalle;
+use App\Models\Equipos;
+use App\Models\Herramientas;
+use App\Models\HistoHerramientaDescartada;
+use App\Models\HistorialEntradas;
+use App\Models\HistorialEntradasDeta;
 use App\Models\Materiales;
 use App\Models\ObjetoEspecifico;
 use App\Models\Proveedor;
 use App\Models\SalidasDetalle;
 use App\Models\TipoCompra;
+use App\Models\TipoEntrada;
+use App\Models\TipoProyecto;
 use App\Models\UnidadMedida;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -131,11 +138,9 @@ class RepuestosController extends Controller
 
     public function indexRegistroEntrada()
     {
-        $arrayTipoCompra  = TipoCompra::orderBy('nombre')->get();
-        $arrayProveedor  = Proveedor::orderBy('nombre')->get();
+        $arrayProveedor = Proveedor::orderBy('nombre', 'ASC')->get();
 
-        return view('backend.admin.repuestos.registros.vistaentradaregistro',
-            compact( 'arrayTipoCompra', 'arrayProveedor'));
+        return view('backend.admin.repuestos.registros.vistaentradaregistro', compact('arrayProveedor'));
     }
 
 
@@ -190,9 +195,8 @@ class RepuestosController extends Controller
     public function guardarEntrada(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'fecha'      => 'required|date',
-            'tipocompra' => 'required',
-            'proveedor'  => 'required',
+            'fecha'        => 'required|date',
+            'id_proveedor' => 'required|integer|exists:proveedor,id',
         ]);
 
         if ($validator->fails()) {
@@ -208,14 +212,15 @@ class RepuestosController extends Controller
                 return ['success' => 0];
             }
 
+            // ── Cabecera ──
             $entrada = new Entradas();
-            $entrada->id_tipocompra = $request->tipocompra;
-            $entrada->id_proveedor = $request->proveedor;
-            $entrada->fecha         = $request->fecha;
-            $entrada->descripcion   = $request->descripcion;
-            $entrada->lote          = $request->factura; // lote es el campo varchar(100)
+            $entrada->id_proveedor   = $request->id_proveedor;
+            $entrada->fecha          = $request->fecha;
+            $entrada->factura        = $request->factura;
+            $entrada->descripcion    = $request->descripcion;
             $entrada->save();
 
+            // ── Detalle ──
             foreach ($datosContenedor as $fila) {
                 $detalle = new EntradasDetalle();
                 $detalle->id_entradas      = $entrada->id;

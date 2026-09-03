@@ -125,21 +125,17 @@
                                        id="usuario" maxlength="100" autocomplete="off" type="text">
 
                                 <label class="font-500">Contraseña</label>
-                                <div class="position-relative">
-                                    <input class="form-control form-control-lg"
-                                           id="password" maxlength="100" type="password" style="padding-right: 50px;">
-                                    <span id="togglePassword"
-                                          onclick="togglePass()"
-                                          style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #6c757d;">
-                                    <i id="eyeIcon" class="fas fa-eye"></i>
-                                </span>
-                                </div>
+                                <input class="form-control form-control-lg"
+                                       id="password" maxlength="100" type="password">
 
                                 <input type="button"
                                        value="INICIAR SESIÓN"
                                        style="margin-top: 20px"
                                        onclick="login()"
                                        class="btn btn-primary btn-lg w-100 shadow-lg">
+
+
+
                             </div>
                         </form>
                     </div>
@@ -157,21 +153,6 @@
 
 
 <script type="text/javascript">
-
-    function togglePass() {
-        var input = document.getElementById('password');
-        var icon = document.getElementById('eyeIcon');
-
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    }
 
     // onkey Enter
     var input = document.getElementById("password");

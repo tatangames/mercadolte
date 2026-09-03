@@ -3,7 +3,7 @@
 @section('title', 'Agregar Extras — Entrada #{{ $entrada->id }}')
 
 @section('content_header')
-    <h1>Agregar Extras a Entrada #{{ $entrada->id }}</h1>
+    <h1>Agregar Extras a Entrada</h1>
 @stop
 
 @section('plugins.Sweetalert2', true)
@@ -11,7 +11,6 @@
 
 @section('content_top_nav_right')
     <link href="{{ asset('css/toastr.min.css') }}" type="text/css" rel="stylesheet"/>
-
     <li class="nav-item dropdown">
         <a href="#" class="nav-link" data-toggle="dropdown">
             <i class="fas fa-cogs"></i>
@@ -36,8 +35,8 @@
 
 @section('content')
     <style>
-        #matriz { table-layout: auto; word-break: break-word; width: 100%; }
-        #matriz-busqueda { table-layout: fixed; }
+        table { table-layout: fixed; }
+        .cursor-pointer:hover { cursor: pointer; color: #401fd2; font-weight: bold; }
         *:focus { outline: none; }
     </style>
 
@@ -51,7 +50,8 @@
                         <div class="card card-gray-dark">
                             <div class="card-header">
                                 <h3 class="card-title">
-                                    Entrada #{{ $entrada->id }}
+                                    Entrada #{{ $entrada->id }} —
+                                    {{ $entrada->tipoproyecto->nombre ?? '' }}
                                 </h3>
                             </div>
                             <div class="card-body">
@@ -61,16 +61,12 @@
                                         <p><strong>{{ date('d/m/Y', strtotime($entrada->fecha)) }}</strong></p>
                                     </div>
                                     <div class="col-md-3">
-                                        <label class="text-muted">Lote / Factura</label>
-                                        <p><strong>{{ $entrada->lote ?? '—' }}</strong></p>
+                                        <label class="text-muted">Factura</label>
+                                        <p><strong>{{ $entrada->factura ?? '' }}</strong></p>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="text-muted">Tipo Compra</label>
-                                        <p><strong>{{ $entrada->tipoCompra->nombre ?? '—' }}</strong></p>
-                                    </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-6">
                                         <label class="text-muted">Descripción</label>
-                                        <p><strong>{{ $entrada->descripcion ?? '—' }}</strong></p>
+                                        <p><strong>{{ $entrada->descripcion ?? '' }}</strong></p>
                                     </div>
                                 </div>
                             </div>
@@ -80,73 +76,69 @@
             </div>
         </section>
 
-        {{-- Botones acción --}}
+        {{-- Botón agregar material --}}
         <section class="content-header">
-            <div class="row mb-2" style="margin-left:0">
-                <button type="button" onclick="abrirModal()" class="btn btn-primary btn-sm mr-2">
+            <div class="row">
+                <button type="button" style="margin-left: 15px" onclick="abrirModal()" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus"></i> Agregar Material
                 </button>
-                <a href="{{ route('admin.historial.entradas.index') }}" class="btn btn-secondary btn-sm">
+                <a href="{{ route('admin.historial.entradas.index') }}"
+                   style="margin-left: 10px"
+                   class="btn btn-secondary btn-sm">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
             </div>
         </section>
 
-        {{-- ══ Modal Agregar Material ══ --}}
+        {{-- Modal buscar material --}}
         <div class="modal fade" id="modalRepuesto">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title">Agregar Material</h4>
-                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
                     </div>
                     <div class="modal-body">
                         <form id="formulario-repuesto">
                             <div class="card-body">
-
                                 <div class="form-group">
-                                    <label>Material <span class="text-danger">*</span></label>
+                                    <label>Material <span style="color:red">*</span></label>
                                     <table class="table" id="matriz-busqueda">
                                         <tbody>
                                         <tr>
                                             <td>
-                                                <input id="repuesto" data-info="0" data-nombre=""
-                                                       autocomplete="off" class="form-control"
-                                                       style="width:100%"
-                                                       onkeyup="buscarMaterial(this)"
-                                                       maxlength="400" type="text"
-                                                       placeholder="Buscar material...">
-                                                <div class="droplista" style="position:absolute;z-index:9;width:75%!important;"></div>
+                                                <input id="repuesto" data-info="0" autocomplete="off"
+                                                       class="form-control" style="width:100%"
+                                                       onkeyup="buscarMaterial(this)" maxlength="400" type="text">
+                                                <div class="droplista" style="position:absolute;z-index:9;width:75% !important;"></div>
                                             </td>
                                         </tr>
                                         </tbody>
                                     </table>
                                 </div>
-
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Cantidad <span class="text-danger">*</span></label>
-                                            <input type="number" id="cantidad" min="1" max="1000000"
-                                                   class="form-control" autocomplete="off" placeholder="0">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Precio (6 decimales) <span class="text-danger">*</span></label>
-                                            <input type="number" id="precio-producto" min="0" max="9000000"
-                                                   step="0.000001" class="form-control" autocomplete="off" placeholder="0.000000">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Detalle (Opcional): <small class="text-muted">(Opcional)</small></label>
-                                            <input type="text" id="codigo" maxlength="100"
-                                                   class="form-control" autocomplete="off">
-                                        </div>
+                                <div class="form-group">
+                                    <label>Cantidad <span style="color:red">*</span></label>
+                                    <div class="col-md-6">
+                                        <input type="number" id="cantidad" min="0" max="1000000"
+                                               class="form-control" autocomplete="off" placeholder="0">
                                     </div>
                                 </div>
-
+                                <div class="form-group">
+                                    <label>Marca</label>
+                                    <div class="col-md-6">
+                                        <input type="text" id="codigo" maxlength="100"
+                                               class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Precio (4 decimales) <span style="color:red">*</span></label>
+                                    <div class="col-md-3">
+                                    <input type="number" min="0" max="1000000" autocomplete="off"
+                                           class="form-control" id="precio-producto" placeholder="0.0000">
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -158,10 +150,12 @@
             </div>
         </div>
 
-        {{-- ══ Tabla Detalle ══ --}}
+        {{-- Tabla de detalle a agregar --}}
         <section class="content-header">
             <div class="row mb-2">
-                <div class="col-sm-6"><h2>Materiales a Agregar</h2></div>
+                <div class="col-sm-6">
+                    <h2>Materiales a Agregar</h2>
+                </div>
             </div>
         </section>
 
@@ -171,29 +165,24 @@
                     <div class="card-header">
                         <h3 class="card-title">Detalle</h3>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover mb-0" id="matriz">
-                                <thead>
-                                <tr>
-                                    <th style="width:5%">#</th>
-                                    <th style="width:38%">Material</th>
-                                    <th style="width:12%">Cantidad</th>
-                                    <th style="width:15%">Detalle (opcional)</th>
-                                    <th style="width:15%">Precio</th>
-                                    <th style="width:15%">Opciones</th>
-                                </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <table class="table" id="matriz" style="margin: 0 15px;">
+                        <thead>
+                        <tr>
+                            <th style="width:3%">#</th>
+                            <th style="width:35%">Material</th>
+                            <th style="width:10%">Cantidad</th>
+                            <th style="width:12%">Marca</th>
+                            <th style="width:10%">Precio</th>
+                            <th style="width:8%">Opciones</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </section>
 
-        {{-- Botón Guardar --}}
-        <div class="modal-footer justify-content-between" style="margin-top:25px;">
+        <div class="modal-footer justify-content-between" style="margin-top: 25px;">
             <button type="button" class="btn btn-success" onclick="preguntaGuardar()">
                 <i class="fas fa-save mr-1"></i> Guardar Extras
             </button>
@@ -210,190 +199,158 @@
 
     <script>
         const ID_ENTRADA = {{ $entrada->id }};
-        var seguroBuscador      = true;
-        var txtContenedorGlobal = null;
+        window.seguroBuscador = true;
+        window.txtContenedorGlobal = null;
 
-        $(function () {
-            $(document).click(function () { $('.droplista').hide(); });
+        $(document).ready(function () {
+            $(document).click(function () { $(".droplista").hide(); });
         });
 
-        // ── Modal ─────────────────────────────────────────────────
+        document.getElementById('cantidad').addEventListener('keypress', function (e) {
+            if (e.key < '0' || e.key > '9') e.preventDefault();
+        });
+
         function abrirModal() {
-            document.getElementById('formulario-repuesto').reset();
-            $('#repuesto').attr('data-info', '0').attr('data-nombre', '');
+            document.getElementById("formulario-repuesto").reset();
+            $('#repuesto').attr('data-info', '0');
             $('#modalRepuesto').modal({ backdrop: 'static', keyboard: false });
         }
 
-        // ── Agregar fila ──────────────────────────────────────────
         function agregarFila() {
-            var repuesto   = document.getElementById('repuesto');
-            var idMaterial = repuesto.dataset.info;
-            var nombreMat  = repuesto.dataset.nombre || repuesto.value.trim();
-            var cantidad   = document.getElementById('cantidad').value;
-            var codigo     = document.getElementById('codigo').value;
-            var precio     = document.getElementById('precio-producto').value;
+            var repuesto      = document.querySelector('#repuesto');
+            var nomRepuesto   = repuesto.value;
+            var cantidad      = document.getElementById('cantidad').value;
+            var codigo        = document.getElementById('codigo').value;
+            var precio        = document.getElementById('precio-producto').value;
 
-            var reglaEntero  = /^[0-9]\d*$/;
-            var reglaDecimal = /^([0-9]+\.?[0-9]{0,4})$/;
+            var reglaEntero   = /^[0-9]\d*$/;
+            var reglaDecimal  = /^([0-9]+\.?[0-9]{0,10})$/;
 
-            if (!idMaterial || idMaterial == 0) {
-                toastr.error('Seleccione un material de la lista'); return;
-            }
-            if (cantidad === '' || !cantidad.match(reglaEntero) || parseInt(cantidad) <= 0) {
-                toastr.error('Cantidad debe ser un entero mayor a 0'); return;
-            }
-            if (parseInt(cantidad) > 1000000) {
-                toastr.error('Cantidad máximo 1 millón'); return;
-            }
-            if (precio === '' || !precio.match(reglaDecimal) || parseFloat(precio) < 0) {
-                toastr.error('Precio debe ser un número decimal no negativo'); return;
-            }
-            if (parseFloat(precio) > 9000000) {
-                toastr.error('Precio máximo 9 millones'); return;
-            }
+            if (repuesto.dataset.info == 0) { toastr.error('Material es requerido'); return; }
+            if (cantidad === '')            { toastr.error('Cantidad es requerida'); return; }
+            if (!cantidad.match(reglaEntero)) { toastr.error('Cantidad debe ser entero'); return; }
+            if (cantidad <= 0)              { toastr.error('Cantidad debe ser mayor a 0'); return; }
+            if (precio === '')              { toastr.error('Precio es requerido'); return; }
+            if (!precio.match(reglaDecimal)){ toastr.error('Precio inválido'); return; }
+            if (precio < 0)                 { toastr.error('Precio no puede ser negativo'); return; }
 
-            // Verificar duplicado
-            var duplicado = false;
-            $('#matriz tbody tr').each(function () {
-                if ($(this).find('input[name="descripcionArray[]"]').attr('data-info') == idMaterial) {
-                    duplicado = true;
-                }
-            });
-            if (duplicado) {
-                toastr.warning('Este material ya fue agregado'); return;
-            }
+            var nFilas = $('#matriz > tbody > tr').length + 1;
 
-            var nFilas = $('#matriz tbody tr').length + 1;
+            var markup = `<tr>
+                <td><p id="fila${nFilas}" class="form-control" style="max-width:65px">${nFilas}</p></td>
+                <td><input name="descripcionArray[]" disabled data-info="${repuesto.dataset.info}" value="${nomRepuesto}" class="form-control" type="text"></td>
+                <td><input name="cantidadArray[]" disabled value="${cantidad}" class="form-control" type="number"></td>
+                <td><input name="codigoArray[]" disabled value="${codigo}" class="form-control" type="text"></td>
+                <td><input name="arrayPrecio[]" data-precio="${precio}" disabled value="$${precio}" class="form-control" type="text"></td>
+                <td><button type="button" class="btn btn-danger btn-block" onclick="borrarFila(this)">Borrar</button></td>
+            </tr>`;
 
-            var fila = `
-                <tr>
-                    <td><span class="num-fila">${nFilas}</span></td>
-                    <td>
-                        <input name="descripcionArray[]" type="hidden"
-                               data-info="${idMaterial}" data-nombre="${nombreMat}">
-                        ${nombreMat}
-                    </td>
-                    <td>
-                        <input name="cantidadArray[]" type="hidden" value="${cantidad}">
-                        ${cantidad}
-                    </td>
-                    <td>
-                        <input name="codigoArray[]" type="hidden" value="${codigo}">
-                        ${codigo}
-                    </td>
-                    <td>
-                        <input name="arrayPrecio[]" type="hidden" value="${precio}">
-                        $${parseFloat(precio).toFixed(4)}
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-danger btn-sm btn-block"
-                                onclick="borrarFila(this)">
-                            <i class="fas fa-trash"></i> Borrar
-                        </button>
-                    </td>
-                </tr>`;
-
-            $('#matriz tbody').append(fila);
-            toastr.success('Material agregado');
+            $("#matriz tbody").append(markup);
+            document.getElementById("formulario-repuesto").reset();
+            $('#repuesto').attr('data-info', '0');
             $('#modalRepuesto').modal('hide');
-
-            document.getElementById('formulario-repuesto').reset();
-            $('#repuesto').attr('data-info', '0').attr('data-nombre', '');
+            toastr.success('Material agregado');
         }
 
-        // ── Borrar fila ───────────────────────────────────────────
-        function borrarFila(btn) {
-            $(btn).closest('tr').remove();
-            renumerarFilas();
+        function borrarFila(el) {
+            el.closest('tr').remove();
+            setearFila();
         }
 
-        function renumerarFilas() {
-            $('#matriz tbody tr').each(function (i) {
-                $(this).find('.num-fila').text(i + 1);
-            });
-        }
-
-        // ── Buscador ──────────────────────────────────────────────
-        function buscarMaterial(e) {
-            if (!seguroBuscador) return;
-            seguroBuscador = false;
-            txtContenedorGlobal = e;
-
-            var texto = e.value;
-            if (texto === '') {
-                $(e).attr('data-info', 0);
-                $('.droplista').hide();
-                seguroBuscador = true;
-                return;
+        function setearFila() {
+            var table = document.getElementById('matriz');
+            var conteo = 0;
+            for (var r = 1; r < table.rows.length; r++) {
+                conteo++;
+                var el = table.rows[r].cells[0].children[0];
+                el.innerHTML = conteo;
             }
+        }
 
-            axios.post(urlAdmin + '/admin/buscar/material', { query: texto })
-                .then(function (response) {
-                    seguroBuscador = true;
-                    var row = $(e).closest('tr');
-                    row.find('.droplista').fadeIn().html(response.data);
-                })
-                .catch(function () { seguroBuscador = true; });
+        function buscarMaterial(e) {
+            if (seguroBuscador) {
+                seguroBuscador = false;
+                var row = $(e).closest('tr');
+                txtContenedorGlobal = e;
+                let texto = e.value;
+                if (texto === '') $(e).attr('data-info', 0);
+
+                axios.post(urlAdmin + '/admin/buscar/material', { query: texto })
+                    .then((response) => {
+                        seguroBuscador = true;
+                        $(row).find(".droplista").fadeIn().html(response.data);
+                    })
+                    .catch(() => { seguroBuscador = true; });
+            }
         }
 
         function modificarValor(edrop) {
-            var texto = $(edrop).text().trim();
-            var id    = edrop.id;
-            $(txtContenedorGlobal).val(texto)
-                .attr('data-info', id)
-                .attr('data-nombre', texto);
-            $('.droplista').hide();
+            let texto = $(edrop).text();
+            $(txtContenedorGlobal).val(texto);
+            $(txtContenedorGlobal).attr('data-info', edrop.id);
         }
 
-        // ── Guardar ───────────────────────────────────────────────
         function preguntaGuardar() {
-            if ($('#matriz tbody tr').length === 0) {
-                toastr.error('Agrega al menos un material'); return;
+            var nFilas = $('#matriz > tbody > tr').length;
+            if (nFilas === 0) {
+                toastr.error('Agrega al menos un material');
+                return;
             }
 
             Swal.fire({
                 title: '¿Guardar materiales extras?',
-                text: '',
+                text: 'Se agregarán a la entrada #' + ID_ENTRADA,
                 type: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
                 cancelButtonColor: '#d33',
                 cancelButtonText: 'Cancelar',
                 confirmButtonText: 'Sí, guardar'
-            }).then(function (result) {
-                if (result.value) guardarExtras();
+            }).then((result) => {
+                if (result.value) {
+                    guardarExtras();
+                }
             });
         }
 
         function guardarExtras() {
-            var contenedorArray = [];
+            var descripcionAtributo = $("input[name='descripcionArray[]']").map(function () { return $(this).attr('data-info'); }).get();
+            var cantidad            = $("input[name='cantidadArray[]']").map(function () { return $(this).val(); }).get();
+            var codigo              = $("input[name='codigoArray[]']").map(function () { return $(this).val(); }).get();
+            var arrayPrecio         = $("input[name='arrayPrecio[]']").map(function () { return $(this).attr('data-precio'); }).get();
 
-            $('#matriz tbody tr').each(function () {
+            const contenedorArray = [];
+            for (var i = 0; i < cantidad.length; i++) {
                 contenedorArray.push({
-                    idMaterial:   $(this).find('input[name="descripcionArray[]"]').attr('data-info'),
-                    infoNombre:   $(this).find('input[name="descripcionArray[]"]').attr('data-nombre'),
-                    infoCantidad: $(this).find('input[name="cantidadArray[]"]').val(),
-                    infoCodigo:   $(this).find('input[name="codigoArray[]"]').val(),
-                    infoPrecio:   $(this).find('input[name="arrayPrecio[]"]').val(),
+                    idMaterial:   descripcionAtributo[i],
+                    infoCantidad: cantidad[i],
+                    infoCodigo:   codigo[i],
+                    infoPrecio:   arrayPrecio[i],
                 });
-            });
+            }
 
-            var formData = new FormData();
+            openLoading();
+            const formData = new FormData();
             formData.append('id_entrada',      ID_ENTRADA);
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
 
-            openLoading();
             axios.post(urlAdmin + '/admin/historial/entradas/extras/guardar', formData)
-                .then(function (response) {
+                .then((response) => {
                     closeLoading();
                     if (response.data.success === 1) {
+                        toastr.success(response.data.mensaje);
+                    }
+                    else if (response.data.success === 2) {
                         toastr.success('Materiales agregados correctamente');
-                        $('#matriz tbody').empty();
+                        $("#matriz tbody tr").remove();
                     } else {
                         toastr.error('Error al guardar');
                     }
                 })
-                .catch(function () { closeLoading(); toastr.error('Error al guardar'); });
+                .catch(() => {
+                    closeLoading();
+                    toastr.error('Error al guardar');
+                });
         }
     </script>
 @endsection

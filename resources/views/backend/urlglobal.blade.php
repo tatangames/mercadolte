@@ -1,4 +1,4 @@
-<!-- URL GLOBAL PETICIONES POST                 -->
+<!-- URL GLOBAL PETICIONES POST          /plantel.com       -->
 <script type="text/javascript">
     const urlAdmin = "{{ url('/')  }}"
 </script>

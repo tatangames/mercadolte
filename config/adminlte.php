@@ -357,12 +357,6 @@ return [
                     'icon' => 'far fa-circle',
                     'route' => 'admin.salida.registro.index',
                 ],
-                [
-                    'text' => 'Pendientes',
-                    'icon' => 'far fa-circle',
-                    'route' => 'admin.pendientes.index',
-                ],
-
             ],
         ],
 
@@ -409,17 +403,16 @@ return [
                 ],
 
                 [
-                    'text' => 'Tipo de Compra',
-                    'icon' => 'far fa-circle',
-                    'route' => 'admin.tipodecompra.index',
-                ],
-
-                [
                     'text' => 'Proveedores',
                     'icon' => 'far fa-circle',
                     'route' => 'admin.proveedor.index',
                 ],
 
+                [
+                    'text' => 'Ajuste de Firmas',
+                    'icon' => 'far fa-circle',
+                    'route' => 'admin.jefefirma.index',
+                ],
             ],
         ],
 
@@ -430,13 +423,10 @@ return [
             'can'     => 'sidebar.reportes',
             'submenu' => [
                 [
-                    'text' => 'Generales',
+                    'text' => 'Entradas / Salidas',
                     'icon' => 'far fa-circle',
-                    'route' => 'admin.reporte.generales.index',
+                    'route' => 'admin.reporte.inventario.entrada.index',
                 ],
-
-
-
             ],
         ],
 

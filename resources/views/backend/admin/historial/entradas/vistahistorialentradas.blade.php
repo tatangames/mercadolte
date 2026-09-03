@@ -51,34 +51,31 @@
                     </div>
                     <div class="card-body">
                         <div class="row align-items-end">
-
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="font-weight-bold">Fecha desde</label>
                                 <input type="date" class="form-control" id="filtro-fecha-desde">
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="font-weight-bold">Fecha hasta</label>
                                 <input type="date" class="form-control" id="filtro-fecha-hasta">
                             </div>
                             <div class="col-md-3">
-                                <label class="font-weight-bold">Tipo de Compra</label>
-                                <select class="form-control" id="filtro-tipocompra" style="width:100%">
-                                    <option value="">Todos</option>
-                                    @foreach($arrayTipoCompra as $tc)
-                                        <option value="{{ $tc->id }}">{{ $tc->nombre }}</option>
-                                    @endforeach
-                                </select>
+                                <label class="font-weight-bold">Factura</label>
+                                <input type="text" class="form-control" id="filtro-factura"
+                                       placeholder="Número de factura...">
                             </div>
                             <div class="col-md-3">
                                 <label class="font-weight-bold">Proveedor</label>
-                                <select class="form-control" id="filtro-proveedor" style="width:100%">
-                                    <option value="">Todos</option>
-                                    @foreach($arrayProveedores as $pv)
-                                        <option value="{{ $pv->id }}">{{ $pv->nombre }}</option>
+                                <select class="form-control" id="filtro-proveedor">
+                                    <option value="">-- Todos --</option>
+                                    @foreach($proveedores as $prov)
+                                        <option value="{{ $prov->id }}">{{ $prov->nombre }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-2 d-flex align-items-end">
+                        </div>
+                        <div class="row align-items-end mt-3">
+                            <div class="col-md-3 d-flex align-items-end">
                                 <div style="width:100%">
                                     <button class="btn btn-primary btn-block mb-1" onclick="recargar()">
                                         <i class="fas fa-search mr-1"></i> Filtrar
@@ -89,20 +86,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <label class="font-weight-bold">Buscar por material</label>
-                                <input type="text" class="form-control" id="filtro-material"
-                                       placeholder="Nombre del material...">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="font-weight-bold">Factura/Lote</label>
-                                <input type="text" class="form-control" id="filtro-factura"
-                                       placeholder="">
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -116,7 +99,11 @@
                         <h3 class="card-title">Listado de Entradas</h3>
                     </div>
                     <div class="card-body">
-                        <div id="tablaDatatable"></div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="tablaDatatable"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -138,25 +125,17 @@
                 <div class="modal-body">
                     <form id="formulario-editar">
                         <input type="hidden" id="id-editar">
+
                         <div class="form-group">
                             <label>Fecha <span class="text-danger">*</span></label>
                             <input type="date" id="fecha-editar" class="form-control">
                         </div>
                         <div class="form-group">
-                            <label>Tipo de Compra <span class="text-danger">*</span></label>
-                            <select id="select-tipocompra-editar" class="form-control" style="width:100%">
-                                <option value="">Seleccione...</option>
-                                @foreach($arrayTipoCompra as $tc)
-                                    <option value="{{ $tc->id }}">{{ $tc->nombre }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Proveedor <small class="text-muted">(Opcional)</small></label>
-                            <select id="select-proveedor-editar" class="form-control" style="width:100%">
-                                <option value="">Sin proveedor</option>
-                                @foreach($arrayProveedores as $pv)
-                                    <option value="{{ $pv->id }}">{{ $pv->nombre }}</option>
+                            <label>Proveedor <span class="text-danger">*</span></label>
+                            <select id="proveedor-editar" class="form-control">
+                                <option value="">-- Seleccione --</option>
+                                @foreach($proveedores as $prov)
+                                    <option value="{{ $prov->id }}">{{ $prov->nombre }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -166,7 +145,8 @@
                         </div>
                         <div class="form-group">
                             <label>Descripción <small class="text-muted">(Opcional)</small></label>
-                            <textarea id="descripcion-editar" class="form-control" rows="3" maxlength="800"></textarea>
+                            <textarea id="descripcion-editar" class="form-control"
+                                      rows="3" maxlength="800"></textarea>
                         </div>
                     </form>
                 </div>
@@ -198,39 +178,26 @@
                         <i class="fas fa-spinner fa-spin fa-2x"></i>
                     </div>
                     <div id="detalle-contenido" style="display:none;">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped table-sm">
-                                <thead class="thead-dark">
-                                <tr>
-                                    <th style="width:4%">#</th>
-                                    <th>Material</th>
-                                    <th style="width:16%">Detalle (opcional)</th>
-                                    <th style="width:10%" class="text-center">Cantidad</th>
-                                    <th style="width:13%" class="text-right">Precio unit.</th>
-                                    <th style="width:13%" class="text-right">Subtotal</th>
-                                    <th style="width:12%" class="text-center">Acciones</th>
-                                </tr>
-                                </thead>
-                                <tbody id="detalle-tbody"></tbody>
-                                <tfoot>
-                                <tr class="table-dark">
-                                    <th colspan="5" class="text-right">Total</th>
-                                    <th class="text-right" id="detalle-total">$0.00</th>
-                                    <th></th>
-                                </tr>
-                                </tfoot>
-                            </table>
-                        </div>
+                        <table class="table table-bordered table-striped table-sm">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Material</th>
+                                <th>Detalle/Código</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-right">Precio unitario</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody id="detalle-tbody"></tbody>
+                        </table>
                     </div>
                     <div id="detalle-vacio" class="text-center text-muted py-4" style="display:none;">
                         <i class="fas fa-inbox fa-2x mb-2"></i>
                         <p>Esta entrada no tiene materiales registrados.</p>
                     </div>
                 </div>
-                <div class="modal-footer justify-content-between">
-                    <a id="btn-agregar-extras" href="#" class="btn btn-success btn-sm">
-                        <i class="fas fa-plus mr-1"></i> Agregar extras
-                    </a>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                 </div>
             </div>
@@ -267,7 +234,7 @@
                                    min="1" max="1000000" placeholder="0">
                         </div>
                         <div class="form-group">
-                            <label>Detalle (opcional) <small class="text-muted">(Opcional)</small></label>
+                            <label>Detalle <small class="text-muted">(Opcional)</small></label>
                             <input type="text" id="detalle-codigo-editar" autocomplete="off" class="form-control" maxlength="100">
                         </div>
                         <div class="form-group">
@@ -297,11 +264,11 @@
     <script>
         var _entradaIdActual     = null;
         var _entradaTituloActual = '';
+        var _tablaCargada        = false;
 
         $(function () {
             const ruta = "{{ url('/admin/historial/entradas/tabla') }}";
 
-            // ── DataTable ─────────────────────────────────────────
             function initDataTable() {
                 if ($.fn.DataTable.isDataTable('#tabla')) {
                     $('#tabla').DataTable().destroy();
@@ -339,74 +306,34 @@
                 $('#tabla_filter input').addClass('form-control form-control-sm').css('display', 'inline-block');
             }
 
-            // ── Cargar tabla ──────────────────────────────────────
             function cargarTabla() {
-
                 const fechaDesde = $('#filtro-fecha-desde').val();
                 const fechaHasta = $('#filtro-fecha-hasta').val();
-                const tipocompra = $('#filtro-tipocompra').val();
-                const proveedor  = $('#filtro-proveedor').val();
-                const material   = $('#filtro-material').val().trim();
                 const factura    = $('#filtro-factura').val().trim();
+                const proveedor  = $('#filtro-proveedor').val();
 
                 const params = new URLSearchParams();
-
                 if (fechaDesde) params.append('fecha_desde', fechaDesde);
                 if (fechaHasta) params.append('fecha_hasta', fechaHasta);
-                if (tipocompra) params.append('tipocompra', tipocompra);
-                if (proveedor)  params.append('proveedor', proveedor);
-                if (material)   params.append('material', material);
-                if (factura)    params.append('factura', factura);
+                if (factura)    params.append('factura',     factura);
+                if (proveedor)  params.append('proveedor',   proveedor);
 
-                const url = params.toString()
-                    ? ruta + '?' + params.toString()
-                    : ruta;
-
-                $('#tablaDatatable').load(url, function () {
-                    initDataTable();
-                });
+                const url = params.toString() ? ruta + '?' + params.toString() : ruta;
+                $('#tablaDatatable').load(url, function () { initDataTable(); });
             }
 
-            cargarTabla();
-
             window.recargar = function () {
+                _tablaCargada = true;
                 cargarTabla();
             };
 
             window.limpiarFiltros = function () {
                 $('#filtro-fecha-desde').val('');
                 $('#filtro-fecha-hasta').val('');
-                $('#filtro-tipocompra').val('').trigger('change');
-                $('#filtro-proveedor').val('').trigger('change');
-                $('#filtro-material').val('');
                 $('#filtro-factura').val('');
-                cargarTabla();
+                $('#filtro-proveedor').val('');
+                if (_tablaCargada) cargarTabla();
             };
-
-            // ── Select2 ───────────────────────────────────────────
-            $('#select-tipocompra-editar').select2({
-                theme: 'bootstrap-5',
-                dropdownParent: $('#modalEditar'),
-                language: { noResults: function () { return 'No encontrado'; } }
-            });
-
-            $('#filtro-tipocompra').select2({
-                theme: 'bootstrap-5',
-                dropdownParent: $('body'),
-                language: { noResults: function () { return 'No encontrado'; } }
-            });
-
-            $('#select-proveedor-editar').select2({
-                theme: 'bootstrap-5',
-                dropdownParent: $('#modalEditar'),
-                language: { noResults: function () { return 'No encontrado'; } }
-            });
-
-            $('#filtro-proveedor').select2({
-                theme: 'bootstrap-5',
-                dropdownParent: $('body'),
-                language: { noResults: function () { return 'No encontrado'; } }
-            });
 
             // ── Delegación botones detalle ────────────────────────
             $(document).on('click', '.btn-editar-detalle', function () {
@@ -432,46 +359,43 @@
             document.getElementById('formulario-editar').reset();
 
             axios.post(urlAdmin + '/admin/historial/entradas/informacion', { id: id })
-                .then(function (response) {
+                .then((response) => {
                     closeLoading();
                     if (response.data.success === 1) {
                         const e = response.data.entrada;
                         $('#id-editar').val(e.id);
                         $('#fecha-editar').val(e.fecha);
-                        $('#factura-editar').val(e.lote ?? '');
+                        $('#factura-editar').val(e.factura     ?? '');
                         $('#descripcion-editar').val(e.descripcion ?? '');
-                        $('#select-tipocompra-editar').val(e.id_tipocompra).trigger('change');
-                        $('#select-proveedor-editar').val(e.id_proveedor ?? '').trigger('change');
+                        $('#proveedor-editar').val(e.id_proveedor);
                         $('#modalEditar').modal('show');
                     } else {
                         toastr.error('No se pudo cargar la información');
                     }
                 })
-                .catch(function () { closeLoading(); toastr.error('Error al obtener información'); });
+                .catch(() => { closeLoading(); toastr.error('Error al obtener información'); });
         }
 
         function editar() {
             const id          = $('#id-editar').val();
             const fecha       = $('#fecha-editar').val().trim();
-            const tipocompra  = $('#select-tipocompra-editar').val();
-            const proveedor   = $('#select-proveedor-editar').val();
+            const proveedor   = $('#proveedor-editar').val();
             const factura     = $('#factura-editar').val().trim();
             const descripcion = $('#descripcion-editar').val().trim();
 
-            if (!fecha)      { toastr.error('La fecha es requerida');       return; }
-            if (!tipocompra) { toastr.error('Tipo de Compra es requerido'); return; }
+            if (!fecha)     { toastr.error('La fecha es requerida');      return; }
+            if (!proveedor) { toastr.error('Seleccione un proveedor');    return; }
 
             openLoading();
             const formData = new FormData();
-            formData.append('id',            id);
-            formData.append('fecha',         fecha);
-            formData.append('id_tipocompra', tipocompra);
-            formData.append('id_proveedor',  proveedor);
-            formData.append('factura',       factura);
-            formData.append('descripcion',   descripcion);
+            formData.append('id',           id);
+            formData.append('fecha',        fecha);
+            formData.append('id_proveedor', proveedor);
+            formData.append('factura',      factura);
+            formData.append('descripcion',  descripcion);
 
             axios.post(urlAdmin + '/admin/historial/entradas/editar', formData)
-                .then(function (response) {
+                .then((response) => {
                     closeLoading();
                     if (response.data.success === 1) {
                         toastr.success('Entrada actualizada correctamente');
@@ -481,25 +405,25 @@
                         toastr.error('Error al actualizar');
                     }
                 })
-                .catch(function () { closeLoading(); toastr.error('Error al actualizar'); });
+                .catch(() => { closeLoading(); toastr.error('Error al actualizar'); });
         }
 
         // ── Eliminar entrada ──────────────────────────────────────
         function eliminar(id) {
             Swal.fire({
                 title: '¿Eliminar entrada?',
-                text: 'Se eliminarán también todos los materiales asociados.',
+                text: 'Se eliminarán también todos los materiales asociados. Esta acción no se puede deshacer.',
                 type: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar'
-            }).then(function (result) {
+            }).then((result) => {
                 if (result.value) {
                     openLoading();
                     axios.post(urlAdmin + '/admin/historial/entradas/eliminar', { id: id })
-                        .then(function (response) {
+                        .then((response) => {
                             closeLoading();
                             switch (response.data.success) {
                                 case 1:
@@ -510,7 +434,7 @@
                                     Swal.fire({
                                         title: 'No se puede eliminar',
                                         text: response.data.msg,
-                                        type: 'warning',
+                                        icon: 'warning',
                                         confirmButtonColor: '#d33',
                                         confirmButtonText: 'Entendido'
                                     });
@@ -523,7 +447,7 @@
                                     toastr.error('Error al eliminar');
                             }
                         })
-                        .catch(function () { closeLoading(); toastr.error('Error al eliminar'); });
+                        .catch(() => { closeLoading(); toastr.error('Error al eliminar'); });
                 }
             });
         }
@@ -534,25 +458,18 @@
             _entradaTituloActual = titulo;
 
             $('#detalle-titulo').text(titulo);
-            $('#btn-agregar-extras').attr('href', urlAdmin + '/admin/historial/entradas/extras/' + id);
             $('#detalle-tbody').html('');
-            $('#detalle-total').text('$0.00');
             $('#detalle-contenido').hide();
             $('#detalle-vacio').hide();
             $('#detalle-loading').show();
             $('#modalDetalle').modal('show');
 
             axios.post(urlAdmin + '/admin/historial/entradas/detalle', { id: id })
-                .then(function (response) {
+                .then((response) => {
                     $('#detalle-loading').hide();
                     if (response.data.success === 1 && response.data.detalle.length > 0) {
-                        let html         = '';
-                        let totalGeneral = 0;
-
-                        response.data.detalle.forEach(function (fila, index) {
-                            const subtotal = parseFloat(fila.precio_raw) * parseFloat(fila.cantidad_inicial);
-                            totalGeneral  += subtotal;
-
+                        let html = '';
+                        response.data.detalle.forEach((fila, index) => {
                             html += `
                                 <tr>
                                     <td>${index + 1}</td>
@@ -560,7 +477,6 @@
                                     <td>${fila.codigo}</td>
                                     <td class="text-center">${fila.cantidad_inicial}</td>
                                     <td class="text-right">$${fila.precio}</td>
-                                    <td class="text-right">$${subtotal.toLocaleString('en-US', {minimumFractionDigits:4, maximumFractionDigits:4})}</td>
                                     <td class="text-center text-nowrap">
                                         <button type="button"
                                                 class="btn btn-warning btn-xs btn-editar-detalle mr-1"
@@ -581,15 +497,13 @@
                                     </td>
                                 </tr>`;
                         });
-
-                        $('#detalle-total').text('$' + totalGeneral.toLocaleString('en-US', {minimumFractionDigits:4, maximumFractionDigits:4}));
                         $('#detalle-tbody').html(html);
                         $('#detalle-contenido').show();
                     } else {
                         $('#detalle-vacio').show();
                     }
                 })
-                .catch(function () {
+                .catch(() => {
                     $('#detalle-loading').hide();
                     $('#detalle-vacio').show();
                     toastr.error('Error al cargar el detalle');
@@ -646,7 +560,7 @@
             }
 
             axios.post(urlAdmin + '/admin/historial/entradas/detalle/editar', formData)
-                .then(function (response) {
+                .then((response) => {
                     closeLoading();
                     if (response.data.success === 1) {
                         toastr.success('Actualizado correctamente');
@@ -656,7 +570,7 @@
                         Swal.fire({
                             title: 'No se puede modificar',
                             text: response.data.msg,
-                            type: 'warning',
+                            icon: 'warning',
                             confirmButtonColor: '#d33',
                             confirmButtonText: 'Entendido'
                         });
@@ -664,7 +578,7 @@
                         toastr.error('Error al actualizar');
                     }
                 })
-                .catch(function () { closeLoading(); toastr.error('Error al actualizar'); });
+                .catch(() => { closeLoading(); toastr.error('Error al actualizar'); });
         }
 
         // ── Eliminar detalle ──────────────────────────────────────
@@ -678,11 +592,11 @@
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar'
-            }).then(function (result) {
+            }).then((result) => {
                 if (result.value) {
                     openLoading();
                     axios.post(urlAdmin + '/admin/historial/entradas/detalle/eliminar', { id: id })
-                        .then(function (response) {
+                        .then((response) => {
                             closeLoading();
                             switch (response.data.success) {
                                 case 1:
@@ -700,7 +614,7 @@
                                     Swal.fire({
                                         title: 'No se puede eliminar',
                                         text: response.data.msg,
-                                        type: 'warning',
+                                        icon: 'warning',
                                         confirmButtonColor: '#d33',
                                         confirmButtonText: 'Entendido'
                                     });
@@ -712,7 +626,7 @@
                                     toastr.error('Error al eliminar');
                             }
                         })
-                        .catch(function () { closeLoading(); toastr.error('Error al eliminar'); });
+                        .catch(() => { closeLoading(); toastr.error('Error al eliminar'); });
                 }
             });
         }

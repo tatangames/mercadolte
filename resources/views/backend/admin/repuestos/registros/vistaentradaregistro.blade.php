@@ -6,6 +6,8 @@
     <h1>Registro de Entradas</h1>
 @stop
 
+@section('plugins.Datatables', true)
+@section('plugins.DatatablesPlugins', true)
 @section('plugins.Sweetalert2', true)
 
 @include('backend.urlglobal')
@@ -51,7 +53,7 @@
         <section class="content">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-md-10">
+                    <div class="col-md-12">
                         <div class="card card-gray-dark">
                             <div class="card-header">
                                 <h3 class="card-title">Información de Ingreso</h3>
@@ -67,35 +69,19 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>Lote / Factura (Opcional):</label>
-                                            <input type="text" class="form-control" autocomplete="off"
-                                                   maxlength="100" id="factura"
-                                                   placeholder="Ej: FAC-001">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-5">
-                                        <div class="form-group">
-                                            <label>Tipo de Compra: <span class="text-danger">*</span></label>
-                                            <select class="form-control" id="select-tipocompra" style="width:100%">
-                                                @foreach($arrayTipoCompra as $tc)
-                                                    <option value="{{ $tc->id }}">{{ $tc->nombre }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-5">
-                                        <div class="form-group">
                                             <label>Proveedor: <span class="text-danger">*</span></label>
-                                            <select class="form-control" id="select-proveedor" style="width:100%">
-                                                <option value="">Seleccione...</option>
-                                                @foreach($arrayProveedor as $tc)
-                                                    <option value="{{ $tc->id }}">{{ $tc->nombre }}</option>
+                                            <select id="select-proveedor" class="form-control" style="width:100%">
+                                                <option value="">-- Seleccionar proveedor --</option>
+                                                @foreach($arrayProveedor as $prov)
+                                                    <option value="{{ $prov->id }}">{{ $prov->nombre }}</option>
                                                 @endforeach
                                             </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Factura (Opcional):</label>
+                                            <input type="text" class="form-control" autocomplete="off" maxlength="100" id="factura">
                                         </div>
                                     </div>
                                 </div>
@@ -104,8 +90,7 @@
                                     <div class="col-md-8">
                                         <div class="form-group">
                                             <label>Descripción (Opcional):</label>
-                                            <input type="text" class="form-control" autocomplete="off"
-                                                   maxlength="800" id="descripcion">
+                                            <input type="text" class="form-control" autocomplete="off" maxlength="800" id="descripcion">
                                         </div>
                                     </div>
                                     <div class="col-md-4 d-flex align-items-end justify-content-end">
@@ -165,16 +150,14 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>Precio (6 decimales) <span class="text-danger">*</span></label>
-                                            <input type="text" id="precio-producto" inputmode="decimal"
-                                                   class="form-control" autocomplete="off" placeholder="0.000000"
-                                                   onkeypress="return validarDecimal(event, this)"
-                                                   oninput="limitarDecimales(this, 6)">
+                                            <label>Precio (4 decimales) <span class="text-danger">*</span></label>
+                                            <input type="number" id="precio-producto" min="0" max="9000000"
+                                                   step="0.0001" class="form-control" autocomplete="off" placeholder="0.0000">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>Detalle (Opcional):</label>
+                                            <label>Detalle (Opcional)</label>
                                             <input type="text" id="codigo" maxlength="100"
                                                    class="form-control" autocomplete="off">
                                         </div>
@@ -210,12 +193,12 @@
                             <table class="table table-bordered table-hover mb-0" id="matriz">
                                 <thead>
                                 <tr>
-                                    <th style="width:5%">#</th>
+                                    <th style="width:6%">#</th>
                                     <th style="width:38%">Material</th>
                                     <th style="width:12%">Cantidad</th>
-                                    <th style="width:15%">Código/Detalle</th>
-                                    <th style="width:15%">Precio</th>
-                                    <th style="width:15%">Opciones</th>
+                                    <th style="width:16%">Detalle</th>
+                                    <th style="width:14%">Precio</th>
+                                    <th style="width:14%">Opciones</th>
                                 </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -248,70 +231,25 @@
         var seguroBuscador = true;
         var txtContenedorGlobal = null;
 
+        $('#select-proveedor').select2({
+            theme: 'bootstrap-5',
+            placeholder: '-- Seleccionar proveedor --',
+            allowClear: true,
+            dropdownParent: $('body'),   // evita el bug de zoom en AdminLTE
+            language: { noResults: function () { return 'No encontrado'; } }
+        });
+
         $(function () {
             // Fecha hoy
             var hoy = new Date();
             document.getElementById('fecha').value = hoy.toJSON().slice(0, 10);
 
-            // Select2
-            $('#select-tipocompra').select2({
-                theme: 'bootstrap-5',
-                dropdownParent: $('body'),
-                language: { noResults: function () { return 'No encontrado'; } }
-            });
-
-            $('#select-proveedor').select2({
-                theme: 'bootstrap-5',
-                dropdownParent: $('body'),
-                language: { noResults: function () { return 'No encontrado'; } }
-            });
 
             // Cerrar droplista al click fuera
             $(document).click(function () {
                 $('.droplista').hide();
             });
         });
-
-        // Solo permite números y un único punto decimal
-        function validarDecimal(e, input) {
-            var char = String.fromCharCode(e.which);
-            var valor = input.value;
-
-            if (e.which === 0) return true; // teclas especiales (backspace, etc)
-
-            if (char === '.') {
-                // Solo un punto permitido
-                if (valor.indexOf('.') !== -1) return false;
-                return true;
-            }
-
-            if (!/[0-9]/.test(char)) return false;
-
-            return true;
-        }
-
-        // Limita la cantidad de decimales mientras escribe
-        function limitarDecimales(input, max) {
-            var valor = input.value;
-
-            // Eliminar cualquier caracter que no sea número o punto
-            valor = valor.replace(/[^0-9.]/g, '');
-
-            // Evitar más de un punto
-            var partes = valor.split('.');
-            if (partes.length > 2) {
-                valor = partes[0] + '.' + partes.slice(1).join('');
-                partes = valor.split('.');
-            }
-
-            // Limitar decimales
-            if (partes[1] && partes[1].length > max) {
-                partes[1] = partes[1].substring(0, max);
-                valor = partes[0] + '.' + partes[1];
-            }
-
-            input.value = valor;
-        }
 
         // ── Modal ─────────────────────────────────────────────────────
         function abrirModal() {
@@ -322,17 +260,18 @@
 
         // ── Agregar fila a tabla ──────────────────────────────────────
         function agregarFila() {
-            var repuesto    = document.getElementById('repuesto');
-            var idMaterial  = repuesto.dataset.info;
-            var nombreMat   = repuesto.dataset.nombre || repuesto.value.trim();
-            var cantidad    = document.getElementById('cantidad').value;
-            var codigo      = document.getElementById('codigo').value;
-            var precio      = document.getElementById('precio-producto').value;
+            var repuesto     = document.getElementById('repuesto');
+            var nomRepuesto  = repuesto.value.trim();
+            var idMaterial   = repuesto.dataset.info;
+            var nombreMat    = repuesto.dataset.nombre || nomRepuesto;
+            var cantidad     = document.getElementById('cantidad').value;
+            var codigo       = document.getElementById('codigo').value;
+            var precio       = document.getElementById('precio-producto').value;
 
-            var reglaEntero  = /^[0-9]\d*$/;
-            var reglaDecimal = /^([0-9]+\.?[0-9]{0,6})$/;
+            var reglaEntero   = /^[0-9]\d*$/;
+            var reglaDecimal  = /^([0-9]+\.?[0-9]{0,4})$/;
 
-            if (!idMaterial || idMaterial == 0 || idMaterial === '') {
+            if (idMaterial == 0 || idMaterial === '') {
                 toastr.error('Seleccione un material de la lista'); return;
             }
             if (cantidad === '' || !cantidad.match(reglaEntero) || parseInt(cantidad) <= 0) {
@@ -346,17 +285,6 @@
             }
             if (parseFloat(precio) > 9000000) {
                 toastr.error('Precio máximo 9 millones'); return;
-            }
-
-            // Verificar duplicado
-            var duplicado = false;
-            $('#matriz tbody tr').each(function () {
-                if ($(this).find('input[name="descripcionArray[]"]').attr('data-info') == idMaterial) {
-                    duplicado = true;
-                }
-            });
-            if (duplicado) {
-                toastr.warning('Este material ya fue agregado'); return;
             }
 
             var nFilas = $('#matriz tbody tr').length + 1;
@@ -379,7 +307,7 @@
                     </td>
                     <td>
                         <input name="arrayPrecio[]" type="hidden" value="${precio}">
-                        $${parseFloat(precio).toFixed(6)}
+                        $${parseFloat(precio).toFixed(4)}
                     </td>
                     <td>
                         <button type="button" class="btn btn-danger btn-sm btn-block"
@@ -391,7 +319,6 @@
 
             $('#matriz tbody').append(fila);
             toastr.success('Material agregado');
-            $('#modalRepuesto').modal('hide');
 
             document.getElementById('formulario-repuesto').reset();
             $('#repuesto').attr('data-info', '0').attr('data-nombre', '');
@@ -416,24 +343,19 @@
             txtContenedorGlobal = e;
 
             var texto = e.value;
-            if (texto === '') {
-                $(e).attr('data-info', 0);
-                $('.droplista').hide();
-                seguroBuscador = true;
-                return;
-            }
+            if (texto === '') { $(e).attr('data-info', 0); }
 
             axios.post(urlAdmin + '/admin/buscar/material', { query: texto })
-                .then(function (response) {
+                .then((response) => {
                     seguroBuscador = true;
                     var row = $(e).closest('tr');
                     row.find('.droplista').fadeIn().html(response.data);
                 })
-                .catch(function () { seguroBuscador = true; });
+                .catch(() => { seguroBuscador = true; });
         }
 
         function modificarValor(edrop) {
-            var texto = $(edrop).text().trim();
+            var texto = $(edrop).text();
             var id    = edrop.id;
             $(txtContenedorGlobal).val(texto)
                 .attr('data-info', id)
@@ -452,7 +374,7 @@
                 cancelButtonColor: '#d33',
                 cancelButtonText: 'Cancelar',
                 confirmButtonText: 'Sí'
-            }).then(function (result) {
+            }).then((result) => {
                 if (result.isConfirmed) guardarEntrada();
             });
         }
@@ -461,18 +383,17 @@
             var fecha       = document.getElementById('fecha').value;
             var factura     = document.getElementById('factura').value;
             var descripcion = document.getElementById('descripcion').value;
-            var tipocompra  = document.getElementById('select-tipocompra').value;
-            var proveedor  = document.getElementById('select-proveedor').value;
+            var idProveedor = $('#select-proveedor').val();
+            if (!idProveedor) { toastr.error('Seleccione un proveedor'); return; }
 
-            if (!fecha)      { toastr.error('Fecha es requerida'); return; }
-            if (!tipocompra) { toastr.error('Tipo de Compra es requerido'); return; }
-            if (!proveedor) { toastr.error('Proveedor es requerido'); return; }
+            if (!fecha)       { toastr.error('Fecha es requerida'); return; }
+
 
             var nFilas = $('#matriz tbody tr').length;
             if (nFilas === 0) { toastr.error('Agregue al menos un material'); return; }
 
             var reglaEntero  = /^[0-9]\d*$/;
-            var reglaDecimal = /^([0-9]+\.?[0-9]{0,6})$/;
+            var reglaDecimal = /^([0-9]+\.?[0-9]{0,4})$/;
 
             var contenedorArray = [];
             var valido = true;
@@ -485,6 +406,7 @@
                 var infoCantidad = $(this).find('input[name="cantidadArray[]"]').val();
                 var infoCodigo  = $(this).find('input[name="codigoArray[]"]').val();
                 var infoPrecio  = $(this).find('input[name="arrayPrecio[]"]').val();
+
 
                 if (!idMaterial || idMaterial == 0) {
                     colorRojoTabla(i);
@@ -502,13 +424,7 @@
                     valido = false; return;
                 }
 
-                contenedorArray.push({
-                    idMaterial:   idMaterial,
-                    infoNombre:   nombre,
-                    infoCantidad: infoCantidad,
-                    infoCodigo:   infoCodigo,
-                    infoPrecio:   infoPrecio
-                });
+                contenedorArray.push({ idMaterial, infoNombre: nombre, infoCantidad, infoCodigo, infoPrecio });
             });
 
             if (!valido) return;
@@ -517,13 +433,12 @@
             formData.append('fecha',           fecha);
             formData.append('factura',         factura);
             formData.append('descripcion',     descripcion);
-            formData.append('tipocompra',      tipocompra);
-            formData.append('proveedor',      proveedor);
+            formData.append('id_proveedor', idProveedor);
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
 
             openLoading();
             axios.post(urlAdmin + '/admin/entradas/guardar', formData)
-                .then(function (response) {
+                .then((response) => {
                     closeLoading();
                     if (response.data.success === 1) {
                         toastr.success('Registrado correctamente');
@@ -532,7 +447,7 @@
                         toastr.error('Error al guardar');
                     }
                 })
-                .catch(function () { closeLoading(); toastr.error('Error al guardar'); });
+                .catch(() => { closeLoading(); toastr.error('Error al guardar'); });
         }
 
         function colorRojoTabla(index) {
@@ -546,8 +461,10 @@
         function limpiar() {
             document.getElementById('descripcion').value = '';
             document.getElementById('factura').value = '';
+            $('#select-tipoentrada').val('').trigger('change');
             $('#select-tipocompra').val('').trigger('change');
-            $('#matriz tbody').empty();
+            $('#select-proveedor').val('').trigger('change');
+            $('#matriz tbody tr').remove();
         }
     </script>
 @endsection

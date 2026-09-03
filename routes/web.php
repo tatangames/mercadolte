@@ -20,7 +20,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('admin.logout')
 
 Route::middleware('auth:admin')->group(function () {
 
-    // --- ROLES ----.
+    // --- ROLES ---
     Route::get('/admin/roles/index', [RolesController::class,'index'])->name('admin.roles.index');
     Route::get('/admin/roles/tabla', [RolesController::class,'tablaRoles']);
     Route::get('/admin/roles/lista/permisos/{id}', [RolesController::class,'vistaPermisos']);
@@ -58,20 +58,6 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/admin/unidadmedida/informacion', [ConfiguracionController::class, 'informacionUnidadMedida']);
     Route::post('/admin/unidadmedida/editar', [ConfiguracionController::class, 'editarUnidadMedida']);
 
-    // --- TIPO DE COMPRA ---
-    Route::get('/admin/tipodecompra/index', [ConfiguracionController::class,'indexTipoDeCompra'])->name('admin.tipodecompra.index');
-    Route::get('/admin/tipodecompra/tabla/index', [ConfiguracionController::class,'tablaTipoDeCompra']);
-    Route::post('/admin/tipodecompra/nuevo', [ConfiguracionController::class, 'nuevaTipoDeCompra']);
-    Route::post('/admin/tipodecompra/informacion', [ConfiguracionController::class, 'informacionTipoDeCompra']);
-    Route::post('/admin/tipodecompra/editar', [ConfiguracionController::class, 'editarTipoDeCompra']);
-
-    // --- PROVEEDOR ---
-    Route::get('/admin/proveedor/index', [ConfiguracionController::class,'indexProveedor'])->name('admin.proveedor.index');
-    Route::get('/admin/proveedor/tabla/index', [ConfiguracionController::class,'tablaProveedor']);
-    Route::post('/admin/proveedor/nuevo', [ConfiguracionController::class, 'nuevaProveedor']);
-    Route::post('/admin/proveedor/informacion', [ConfiguracionController::class, 'informacionProveedor']);
-    Route::post('/admin/proveedor/editar', [ConfiguracionController::class, 'editarProveedor']);
-
     // --- RUBRO ---
     Route::get('/admin/rubro/index', [ConfiguracionController::class,'indexRubro'])->name('admin.rubro.index');
     Route::get('/admin/rubro/tabla/index', [ConfiguracionController::class,'tablaRubro']);
@@ -93,6 +79,14 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/admin/objetoespecifico/informacion', [ConfiguracionController::class, 'informacionObjetoEspecifico']);
     Route::post('/admin/objetoespecifico/editar', [ConfiguracionController::class, 'editarObjetoEspecifico']);
 
+    // --- PROVEEDOR ---
+    Route::get('/admin/proveedor/index', [ConfiguracionController::class,'vistaProveedor'])->name('admin.proveedor.index');
+    Route::get('/admin/proveedor/tabla/index', [ConfiguracionController::class,'tablaProveedor']);
+    Route::post('/admin/proveedor/nuevo', [ConfiguracionController::class,'nuevoProveedor']);
+    Route::post('/admin/proveedor/informacion', [ConfiguracionController::class,'infoProveedor']);
+    Route::post('/admin/proveedor/editar', [ConfiguracionController::class,'actualizarProveedor']);
+
+
     // --- INVENTARIO ---
     Route::get('/admin/inventario/index', [RepuestosController::class,'index'])->name('admin.materiales.index');
     Route::get('/admin/inventario/tabla/index', [RepuestosController::class,'tablaMateriales']);
@@ -112,14 +106,6 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/admin/buscar/material/disponible',  [SalidasController::class,'buscadorMaterialDisponible']);
     Route::post('/admin/buscar/material/disponibilidad', [SalidasController::class, 'infoBodegaMaterialDetalleFila']);
 
-    // --- PENDIENTES ---
-    Route::get('/admin/pendientes/entregas',          [SalidasController::class, 'indexPendienteEntrega'])->name('admin.pendientes.index');
-    Route::post('/admin/pendientes/salida-parcial',   [SalidasController::class, 'registrarSalidaParcial'])->name('admin.pendientes.parcial');
-    Route::post('/admin/pendientes/finalizar',        [SalidasController::class, 'finalizarDetalle'])->name('admin.pendientes.finalizar');
-    Route::post('/admin/pendientes/detalle-entregas', [SalidasController::class, 'detalleEntregas'])->name('admin.pendientes.detalle');
-    Route::post('/admin/pendientes/entrega/editar',     [SalidasController::class, 'editarEntrega'])->name('admin.pendientes.entrega.editar');
-    Route::post('/admin/pendientes/entrega/actualizar', [SalidasController::class, 'actualizarEntrega'])->name('admin.pendientes.entrega.actualizar');
-    Route::post('/admin/pendientes/entrega/eliminar',   [SalidasController::class, 'eliminarEntrega'])->name('admin.pendientes.entrega.eliminar');
 
     // --- HISTORIAL / ENTRADAS ---
     Route::get('/admin/historial/entradas', [HistorialController::class,'indexHistorialEntradas'])->name('admin.historial.entradas.index');
@@ -140,20 +126,31 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/admin/historial/salidas/editar',      [HistorialController::class, 'editarSalida']);
     Route::post('/admin/historial/salidas/eliminar',    [HistorialController::class, 'eliminarSalida']);
     Route::post('/admin/historial/salidas/detalle', [HistorialController::class, 'detalleSalida']);
+    Route::get('/admin/historial/salidas/extras/{id}',      [HistorialController::class, 'vistaExtrasSalida'])->name('admin.historial.salidas.extras');
+    Route::post('/admin/historial/salidas/extras/guardar',  [HistorialController::class, 'guardarExtrasSalida']);
+    Route::post('/admin/historial/salidas/detalle/eliminar', [HistorialController::class, 'eliminarDetalleSalida']);
+    Route::post('/admin/historial/buscarmaterial/nombre',  [HistorialController::class,'buscadorMaterialGetNombre']);
+    Route::post('/admin/historial/salidas/editarcantidad',      [HistorialController::class, 'editarCantidadSalida']);
 
 
 
-    // --- REPORTES ---
-    Route::get('/admin/reporte/generales', [ReportesController::class,'vistaReporteGenerales'])->name('admin.reporte.generales.index');
-    Route::get('/admin/reporte/pdf/inventario', [ReportesController::class,'generarPDFExistencias']);
+
+    // --- REPORTE / ENTRADA POR PROYECTO
+    Route::get('/admin/reporte/inventario/quehaentrado', [ReportesController::class,'vistaQueHaEntrado'])->name('admin.reporte.inventario.entrada.index');
+    Route::get('/admin/reporte/quehaentrado/pdf/{desde}/{hasta}/{tipo}', [ReportesController::class, 'pdfQueHaEntradoProyectos']);
+    Route::get('/admin/reporte/quehasalido/pdf/{desde}/{hasta}/{tipo}', [ReportesController::class, 'pdfQueHaSalidoProyectos']);
+
+    // --- ACTUALIZAR DISTANCIA FIRMAS ---
+    Route::post('/admin/informacion/actualizar/px', [ReportesController::class, 'actualizarPxInformacionGeneral'])
+        ->name('admin.informacion.actualizar.px');
+
+    // --- JEFE FIRMAS ---
+    Route::get('/admin/jefefirma/index', [ConfiguracionController::class,'vistaJefeFirmas'])->name('admin.jefefirma.index');
+    Route::post('/admin/jefefirma/actualizar',  [ConfiguracionController::class,'actualizarJefeFirmas']);
+
+    Route::get('admin/reporte/inventario/pdf/{idMaterial}', [ReportesController::class, 'pdfInventarioActual'])->name('admin.reporte.inventario.pdf');
+
     Route::get('/admin/bodega/reportespdf/inicial/final/{desde}/{hasta}', [ReportesController::class, 'reportePDFInicialPorPeriodos']);
-    Route::get('/admin/reporte/pdf/entregados/{desde}/{hasta}/{idunidad}', [ReportesController::class,'generarPDFEntregados']);
-    Route::get('/admin/bodega/reportes/pdf/entregadopormaterial/{desde}/{hasta}/{idmaterial}', [ReportesController::class, 'reporteEntregadoPorMaterial']);
-
-
-
-
-
 
 
 
